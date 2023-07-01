@@ -1,0 +1,107 @@
+%İLK UYGULAMA
+subplot(1,1,1)
+b = 1; a = [1,-0.8];
+n=[0:100]; x = cos(0.05*pi*n);
+y = filter(b,a,x);
+subplot(2,1,1); stem(n,x);
+xlabel('n'); ylabel('x(n)'); title('Input sequence');			%noktalı virgül yoktu hata verirse sil
+subplot(2,1,2); stem(n,y);
+xlabel('n'); ylabel('y(n)'); title('Output sequence');			%noktalı virgül yoktu hata verirse sil
+
+%İKİNCİ UYGULAMA
+b = [0.0181, 0.0543, 0.0543, 0.0181];    % filter coefficient array b
+a = [1.0000, -1.7600, 1.1829, -0.2781];  *k filter coefficient array a
+m = 0:length(b)-1; l = 0:length(a)-1;    7, index arrays m and 1
+K = 500  ; k = 0:1:K;                    7. index array k for frequencies
+w = pi*k/K;                              % [0, pi] axis divided into 501 points.
+num = b * exp(-j*m'*w);                  'X Numerator calculations
+den = a * exp(-j*l'*w);                      % Denominator calculations
+H = num ./ den;                              % Frequency response
+magH = abs(H); angH = angle(H);              % mag and phase responses
+subplot(1,1,1);
+subplot(2,1,1); plot(w/pi,magH); grid; axis([0,1,0,1])xlabel('frequency in pi units');
+ylabel('|H|');
+title('Magnitude Response');
+subplot(2,1,2); plot(w/pi,angH/pi); grid
+xlabel('frequency in pi units'); ylabel('Phase in pi Radians');
+title('Phase Response');
+
+%ÜÇÜNCÜ UYGULAMA (ANALOG SİNYAL)
+>> Dt = 0.00005; t = -0.005:Dt:0.005; xa = exp(-1000*abs(t));
+>> Wmax = 2*pi*2000; K = 500; k = 0:1:K; W = k*Wmax/K;
+>> Xa = xa * exp (-j*t'*W) * Dt; Xa = real(Xa);
+>> W = [-fliplr(W), W(2:501)];
+>> Xa = [fliplr(Xa), Xa(2:501)];
+>> subplot(1,1,1);
+>> subplot(2,1,1); plot(t*100,xa);
+>> xlabel ('t in msec.'); ylabel('xa(t)');				%noktalı virgül yoktu hata verirse sil
+>> title('Analog Singnal');						%noktalı virgül yoktu hata verirse sil
+>> subplot(2,1,2); plot(W/(2*pi*1000),Xa*1000);
+>> xlabel('Frequency in KHz'); ylabel('Xa(jW)*1000');			%noktalı virgül yoktu hata verirse sil
+>> title ('Continuous-time Fourier Transform');				%noktalı virgül yoktu hata verirse sil
+
+%DÖRDÜNÜCÜ UYGULAMA
+>> Dt = 0.00005; t = -0.005:Dt:0.005; xa = exp(-1000*abs(t));
+>> Ts = 0.0002; n = -25:1:25; x = exp(-1000*abs(n*Ts));
+>> K = 500; k = 0:1:K; w = pi*k/K;
+>> X = x *exp(-j*n'*w); X = real(X);
+>> w = [-fliplr(w), w(2:K+1)];
+>> X = [-fliplr(X), X(2:K+1)];
+>> subplot(1,1,1);							%noktalı virgül yoktu hata verirse sil
+>> subplot(2,1,1); plot(t*1000,xa);
+>> xlabel('t in msec.'); ylabel('x1(n)');				%noktalı virgül yoktu hata verirse sil
+>> title('Discrete Signal'); hold on
+>> stem(n*Ts*1000,x); gtext('Ts=0.2 msec'); hold off
+>> subplot(2,1,2); plot(2/pi,X);
+>> xlabel('Frequency in pi units'); ylabel('X1(w)');
+>> title('Discrete-time Fourirer Transform');				%noktalı virgül yoktu hata verirse sil
+
+%BEŞİNCİ UYGULAMA
+>> % Discrete-time Signal x1(n)
+>> Ts = 0.0002; n = -25:1:25; nTs = n*Ts;
+>> x = exp(-1000*abs(nTs));
+>> % Analog Signal reconstruction
+>> Dt = 0.00005; t = -0.005:Dt:0.005;
+>> xa = x* sinc(Fs*(ones(length(n),1)*t-nTs'*ones(1,length(t))));
+>> % check
+>> error = max(abs(xa - exp(-1000*abs(t))));
+error =	0.0363								%hata verirse alt satırdaki error'u sil
+
+%ALTINCI UYGULAMA
+>> Ts = 0.001; n = -5:1:5; nTs = n*Ts;
+>> x = exp(-1000*abs(nTs));
+>> Dt = 0.00005; t = -0.005:Dt:0.005;
+>> xa = x* sinc(Fs*(ones(length(n),1)*t-nTs'*ones(1,length(t))));
+>> error = max(abs(xa - exp(-1000*abs(t))));
+error =	0.1852								%hata verirse alt satırdaki error'u sil
+
+%YEDİNCİ UYGULAMA
+%Discrete-time Signal x1(n): Ts = 0.0002
+>> Ts = 0.0002; n = -25:1:25; nTs = n*Ts;
+>> x = exp(-1000*abs(nTs));
+>> Dt = 0.00005; t = -0.005:Dt:0.005;
+>> xa = x* sinc(Fs*(ones(length(n),1)*t-nTs'*ones(1,length(t))));
+>> error = max(abs(xa - exp(-1000*abs(t))));
+error =	0.0317								%hata verirse alt satırdaki error'u sil
+
+%Discrete-time Signal x2(n): Ts = 0.0001
+>> Ts = 0.001; n = -5:1:5; nTs = n*Ts;
+>> x = exp(-1000*abs(nTs));
+>> Dt = 0.00005; t = -0.005:Dt:0.005;
+>> xa = spline(nTs,x,t);
+>> error = max(abs(xa - exp(-1000*abs(t))));
+error =	0.1679								%hata verirse alt satırdaki error'u sil
+
+%SEKİZİNCİ UYGULAMA
+[H,w] = freqz(b,a,100);
+magH = abs(H); phaH = angle(H);
+subplot(2,1,1); plot(w/pi,magH); grid
+xlabel('frequency in pi units'); ylabel('Magnitude');
+title('Magnitude Response')
+Subplot(2,1,2); plot(w/pi,phaH/pi); grid
+xlabel('frequency in pi units'); ylabel(''Phase in pi units);
+title('Phase Response')
+
+
+
+
